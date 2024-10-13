@@ -38,45 +38,99 @@ const DemandIcon = {
   scale: 1.5,
 }
 
+// InventoryList Component
 const InventoryList = ({title, items}) => (
-  <div className="mt-2">
-    <h4 className="font-semibold text-sm">{title}:</h4>
-    <ul className="list-disc list-inside">
+  <div className="mt-4">
+    <h4 className="font-semibold text-sm text-gray-700">{title}:</h4>
+    <ul className="mt-2 space-y-1">
       {items.map((item, index) => (
-        <li key={index} className="text-sm">
-          {item}
+        <li
+          key={index}
+          className="flex items-center text-sm text-gray-600 truncate"
+          title={item}
+        >
+          {/* Optional: Add an icon for each item */}
+          <span className="mr-2 text-green-500">
+            <DollarSign className="h-4 w-4" />
+          </span>
+          <span className="truncate">{item}</span>
         </li>
       ))}
     </ul>
   </div>
 )
 
+// Enhanced LocationCard Component with Wrapping Title and Wrapped Address
 const LocationCard = ({name, data, onClose}) => {
   const isSupplier = 'surplus' in data
   const items = isSupplier ? data.surplus : data.demand
   const itemDetails = isSupplier ? data.surplus_mapping : {}
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-4 w-64">
-      <div className="flex justify-between items-center mb-2">
-        <h3 className="text-lg font-semibold">{name}</h3>
-        <Button variant="ghost" size="icon" onClick={onClose}>
+    <div className="bg-white shadow-xl rounded-xl overflow-hidden w-80 h-96 flex flex-col">
+      {/* Header */}
+      <div className="flex justify-between items-start bg-gradient-to-r from-green-500 to-teal-400 px-4 py-3">
+        <div className="flex flex-col">
+          {/* Badge Positioned Above the Name */}
+          <Badge
+            variant={isSupplier ? 'success' : 'warning'}
+            className={`text-xs uppercase ${
+              isSupplier
+                ? 'bg-green-100 text-green-800'
+                : 'bg-yellow-100 text-yellow-800'
+            } mb-1 self-start`}
+          >
+            {isSupplier ? 'Supplier' : 'Demander'}
+          </Badge>
+          {/* Store Name */}
+          <span
+            className="text-white text-lg font-semibold break-words"
+            title={name}
+          >
+            {name}
+          </span>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          className="text-white hover:bg-white/10 p-1"
+        >
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </Button>
       </div>
-      <Badge variant={isSupplier ? 'default' : 'secondary'} className="mb-2">
-        {isSupplier ? 'Supplier' : 'Demander'}
-      </Badge>
-      <p className="text-sm mb-2">{data.data.address}</p>
-      <ScrollArea className="h-40">
-        <InventoryList
-          title={isSupplier ? 'Surplus Items' : 'Demanded Items'}
-          items={items.flatMap((category) =>
-            isSupplier ? itemDetails[category] : [category],
-          )}
-        />
-      </ScrollArea>
+
+      {/* Address */}
+      <div className="px-4 py-2 border-b border-gray-200">
+        <p
+          className="text-sm text-gray-600 line-clamp-2"
+          title={data.data.address}
+        >
+          {data.data.address}
+        </p>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 px-4 py-3">
+        <ScrollArea className="h-full">
+          <InventoryList
+            title={isSupplier ? 'Surplus Items' : 'Demanded Items'}
+            items={items.flatMap((category) =>
+              isSupplier ? itemDetails[category] : [category],
+            )}
+          />
+        </ScrollArea>
+      </div>
+
+      {/* Optional: Additional Actions or Information */}
+      {/*
+      <div className="px-4 py-3 bg-gray-50">
+        <Button variant="primary" size="sm" className="w-full">
+          View Details
+        </Button>
+      </div>
+      */}
     </div>
   )
 }
@@ -132,17 +186,20 @@ export default function MissionControl() {
     }
   }, [])
 
-  const mapOptions = useMemo(() => ({
-    disableDefaultUI: true,
-    clickableIcons: false,
-    styles: [
-      {
-        featureType: "poi",
-        elementType: "labels",
-        stylers: [{ visibility: "off" }],
-      },
-    ],
-  }), [])
+  const mapOptions = useMemo(
+    () => ({
+      disableDefaultUI: true,
+      clickableIcons: false,
+      styles: [
+        {
+          featureType: 'poi',
+          elementType: 'labels',
+          stylers: [{visibility: 'off'}],
+        },
+      ],
+    }),
+    [],
+  )
 
   const {isLoaded} = useJsApiLoader({
     id: 'google-map-script',
