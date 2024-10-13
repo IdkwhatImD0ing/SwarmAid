@@ -1,5 +1,7 @@
 import localFont from "next/font/local";
+import Navbar from "./Navbar";
 import "./globals.css";
+import 'leaflet/dist/leaflet.css'
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -23,6 +25,7 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Navbar />
         {children}
       </body>
     </html>
