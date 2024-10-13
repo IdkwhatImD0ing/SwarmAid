@@ -12,13 +12,11 @@ class ConnectionManager:
     async def connect(self, websocket: WebSocket, client_id: str):
         await websocket.accept()
         self.active_connections[client_id] = websocket
-        print(self.active_connections)
 
     # disconnects client from ws
     async def disconnect(self, client_id: str):
         try:
             del self.active_connections[client_id]
-            print(self.active_connections)
         except KeyError:
             pass
 
@@ -29,7 +27,6 @@ class ConnectionManager:
     # shows data to all clients with active connections to the ws
     async def broadcast(self, data: dict):
         try:
-            print(self.active_connections)
             for connection in self.active_connections.values():
                 await connection.send_json(data)
             return "success"

@@ -136,7 +136,28 @@ class AgentSwarm:
             temperature=0.8
         )
         
-        print(sending_completion.choices[0].message.content)
+        try:
+            # Schedule the broadcast coroutine to run on the event loop
+            future = asyncio.run_coroutine_threadsafe(
+                self.manager.broadcast({
+                    "event": "notification",
+                    "data": {
+                        "recipient": origin,
+                        "message": sending_completion.choices[0].message.content
+                    }
+                }),
+                self.loop
+            )
+            
+            # Wait for the result with a timeout
+            result = future.result(timeout=10)
+            print(f"Broadcast result: {result}")
+        
+        except asyncio.TimeoutError:
+            print("Broadcast failed: Operation timed out.")
+        except Exception as e:
+            print(f"Broadcast failed: {e}")
+        
         
         receiving_completion = openai_client.chat.completions.create(
             model="gpt-4o-mini",
@@ -144,7 +165,27 @@ class AgentSwarm:
             temperature=0.8
         )   
         
-        print(receiving_completion.choices[0].message.content)
+        try:
+            # Schedule the broadcast coroutine to run on the event loop
+            future = asyncio.run_coroutine_threadsafe(
+                self.manager.broadcast({
+                    "event": "notification",
+                    "data": {
+                        "recipient": destination,
+                        "message": receiving_completion.choices[0].message.content
+                    }
+                }),
+                self.loop
+            )
+            
+            # Wait for the result with a timeout
+            result = future.result(timeout=10)
+            print(f"Broadcast result: {result}")
+        
+        except asyncio.TimeoutError:
+            print("Broadcast failed: Operation timed out.")
+        except Exception as e:
+            print(f"Broadcast failed: {e}")
         return True
     
     def logistics_agent_match(self) -> Tuple[List[Tuple[str, str, str, List[str]]], 
