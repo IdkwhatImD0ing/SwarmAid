@@ -96,7 +96,9 @@ export default function MissionControl() {
   const [assignments, setAssignments] = useState([])
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/ws?client_id=1235`)
+    const socket = new WebSocket(
+      `wss://fitting-correctly-lioness.ngrok-free.app/ws?client_id=1235`,
+    )
 
     socket.onopen = () => {
       console.log('WebSocket connection established')

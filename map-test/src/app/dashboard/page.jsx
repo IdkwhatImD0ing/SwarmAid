@@ -19,7 +19,9 @@ export default function ChatBot() {
   useEffect(() => {
     console.log('useEffect')
 
-    const newSocket = new WebSocket(`ws://localhost:8000/ws?client_id=1234`)
+    const newSocket = new WebSocket(
+      `wss://fitting-correctly-lioness.ngrok-free.app/ws?client_id=1234`,
+    )
 
     newSocket.onopen = () => {
       console.log('WebSocket connection established')
