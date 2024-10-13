@@ -7,15 +7,9 @@ import {Badge} from '@/components/ui/badge'
 import {ScrollArea} from '@/components/ui/scroll-area'
 import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
-import {
-  PieChart as RechartsPieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Legend,
-  Tooltip,
-} from 'recharts'
-
+import RedistributedFoodChart from './chart'
+import CombinedStats from './combined'
+import AssignmentsList from './assignments'
 const mapContainerStyle = {
   width: '100%',
   height: '100%',
@@ -87,94 +81,10 @@ const LocationCard = ({name, data, onClose}) => {
   )
 }
 
-const StatsCard = ({title, value, icon: Icon}) => (
-  <Card>
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium">{title}</CardTitle>
-      <Icon className="h-4 w-4 text-muted-foreground" />
-    </CardHeader>
-    <CardContent>
-      <div className="text-2xl font-bold">{value}</div>
-    </CardContent>
-  </Card>
-)
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8']
-
-const RedistributedFoodChart = ({data}) => (
-  <Card className="col-span-2">
-    <CardHeader>
-      <CardTitle>Redistributed Food</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="h-[300px] flex">
-        <ResponsiveContainer width="50%" height="100%">
-          <RechartsPieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              outerRadius={80}
-              fill="#8884d8"
-              dataKey="value"
-              startAngle={0}
-              endAngle={360}
-            >
-              {data.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={COLORS[index % COLORS.length]}
-                />
-              ))}
-            </Pie>
-            <Tooltip />
-          </RechartsPieChart>
-        </ResponsiveContainer>
-        <div className="w-1/2 flex flex-col justify-center">
-          {data.map((entry, index) => (
-            <div key={`legend-${index}`} className="flex items-center mb-2">
-              <div
-                className="w-4 h-4 mr-2"
-                style={{backgroundColor: COLORS[index % COLORS.length]}}
-              />
-              <span>
-                {entry.name}: {entry.value}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-)
-
 const StatsPanel = ({stats}) => (
   <div className="space-y-4">
-    <h2 className="text-2xl font-bold mb-4">Mission Control Dashboard</h2>
-    <div className="grid grid-cols-2 gap-4">
-      <StatsCard
-        title="Total Food Redist."
-        value={`${stats.totalFoodRedistributed} kg`}
-        icon={Utensils}
-      />
-      <StatsCard
-        title="Food Waste Reduc."
-        value={`${stats.foodWasteReduction}%`}
-        icon={BarChart3}
-      />
-      <StatsCard
-        title="Fuel Reduction"
-        value={`${stats.fuelReduction} L`}
-        icon={Truck}
-      />
-      <StatsCard
-        title="Cash Value of Items"
-        value={`$${stats.cashValue}`}
-        icon={DollarSign}
-      />
-      <RedistributedFoodChart data={stats.redistributedFoodData} />
-    </div>
+    <CombinedStats stats={stats} />
+    <RedistributedFoodChart data={stats.redistributedFoodData} />
   </div>
 )
 
@@ -183,32 +93,40 @@ export default function MissionControl() {
   const [locations, setLocations] = useState({locations: {}})
   const [connected, setConnected] = useState(false)
   const [socket, setSocket] = useState(null)
+  const [assignments, setAssignments] = useState([])
 
   useEffect(() => {
-    console.log('useEffect')
+    const socket = new WebSocket(`ws://localhost:8000/ws?client_id=1235`)
 
-    const newSocket = new WebSocket(`ws://localhost:8000/ws?client_id=1234`)
-
-    newSocket.onopen = () => {
+    socket.onopen = () => {
       console.log('WebSocket connection established')
-      newSocket.send(
+      socket.send(
         JSON.stringify({
           event: 'get_db',
         }),
       )
       setConnected(true)
-      setSocket(newSocket)
+      setSocket(socket)
     }
 
-    newSocket.onmessage = (event) => {
+    socket.onmessage = (event) => {
+      console.log('Received:', event.data)
       const data = JSON.parse(event.data)
       if (data.event === 'db_response') {
         setLocations(data.data)
+      } else if (data.event === 'assignments') {
+        socket.send(JSON.stringify({event: 'get_db'}))
+        setAssignments((prevAssignments) => [...prevAssignments, ...data.data])
       }
     }
 
-    return () => {
-      newSocket.close()
+    socket.onerror = (error) => {
+      console.error('WebSocket error:', error)
+    }
+
+    socket.onclose = (event) => {
+      console.log('WebSocket closed:', event)
+      setConnected(false)
     }
   }, [])
 
@@ -269,12 +187,23 @@ export default function MissionControl() {
           </div>
         )}
       </div>
-      <div className="w-100 bg-white shadow-lg z-10 overflow-auto">
-        <ScrollArea className="h-screen">
-          <div className="p-4">
+      <div className="w-1/3 bg-white shadow-lg z-10 flex flex-col">
+        {/* Existing ScrollArea for Stats */}
+        <div className="flex-1 overflow-hidden">
+          <ScrollArea className="h-full p-4">
+            <h2 className="text-2xl font-bold mb-4">
+              Mission Control Dashboard
+            </h2>
             <StatsPanel stats={stats} />
-          </div>
-        </ScrollArea>
+          </ScrollArea>
+        </div>
+        {/* New ScrollArea for Transfers */}
+        <div className="flex-1 overflow-hidden border-t p-4">
+          <h2 className="text-2xl font-bold mb-4">Transfers</h2>
+          <ScrollArea className="h-full">
+            <AssignmentsList assignments={assignments} />
+          </ScrollArea>
+        </div>
       </div>
     </div>
   )

@@ -12,21 +12,30 @@ class ConnectionManager:
     async def connect(self, websocket: WebSocket, client_id: str):
         await websocket.accept()
         self.active_connections[client_id] = websocket
+        print(self.active_connections)
 
     # disconnects client from ws
     async def disconnect(self, client_id: str):
         try:
             del self.active_connections[client_id]
+            print(self.active_connections)
         except KeyError:
             pass
 
     async def send_personal_message(self, data: dict, websocket: WebSocket):
         await websocket.send_json(data)
+        return "success"
 
     # shows data to all clients with active connections to the ws
     async def broadcast(self, data: dict):
-        for connection in self.active_connections.values():
-            await connection.send_json(data)
+        try:
+            print(self.active_connections)
+            for connection in self.active_connections.values():
+                await connection.send_json(data)
+            return "success"
+        except Exception as e:
+            print(f"Broadcast failed: {e}")
+            return e
 
 
 manager = ConnectionManager()

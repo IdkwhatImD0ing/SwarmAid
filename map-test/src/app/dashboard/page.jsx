@@ -34,6 +34,7 @@ export default function ChatBot() {
 
     newSocket.onmessage = (event) => {
       const data = JSON.parse(event.data)
+      console.log(data)
       if (data.event === 'message_start') {
         console.log('Message start')
         setMessages((messages) => [
@@ -60,10 +61,6 @@ export default function ChatBot() {
       } else if (data.event === 'message_end') {
         console.log('Message end')
       }
-    }
-
-    return () => {
-      newSocket.close()
     }
   }, [])
 

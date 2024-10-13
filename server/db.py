@@ -2,8 +2,11 @@ db = {
     "locations": {
         # Suppliers
         "Kroger": {
-            "surplus": [],
-            "surplus_mapping": {},
+            "surplus": ["fruits", "dairy"],
+            "surplus_mapping": {
+                "fruits": ["strawberry", "apple"],
+                "dairy": ["milk", "cheese"]
+            },
             "data": {
                 "lat": 42.315701,
                 "lon": -83.192711,
@@ -11,8 +14,11 @@ db = {
             }
         },
         "Cinnabon": {
-            "surplus": [],
-            "surplus_mapping": {},
+            "surplus": ["grains", "baked goods"],
+            "surplus_mapping": {
+                "grains": ["bread", "rice"],
+                "baked goods": ["muffins", "cookies"]
+            },
             "data": {
                 "lat": 42.3167159,
                 "lon": -83.2228552,
@@ -20,8 +26,10 @@ db = {
             }
         },
         "Redford Fish & Seafood Market": {
-            "surplus": [],
-            "surplus_mapping": {},
+            "surplus": ["seafood"],
+            "surplus_mapping": {
+                "seafood": ["salmon", "shrimp"]
+            },
             "data": {
                 "lat": 42.3571096,
                 "lon": -83.2760451,

@@ -8,6 +8,8 @@ openai_client = OpenAI()
 import math
 import heapq
 from typing import Dict, List, Tuple
+import asyncio
+import threading
 
 # Initialize the Swarm client
 client = Swarm()
@@ -71,6 +73,19 @@ class AgentSwarm:
             instructions=supply_agent_instructions,
             functions=[self.save_items]
         )
+        
+        # Create a new event loop
+        self.loop = asyncio.new_event_loop()
+        
+        # Start the event loop in a separate daemon thread
+        self.loop_thread = threading.Thread(target=self.start_event_loop, daemon=True)
+        self.loop_thread.start()
+        
+    def start_event_loop(self):
+        """Run the event loop forever."""
+        asyncio.set_event_loop(self.loop)
+        self.loop.run_forever()
+    
 
     def run(self, messages, stream=False):
         
@@ -282,6 +297,26 @@ class AgentSwarm:
                             pass
 
         self.db['dispatchs'] = assignments
+
+        try:
+            # Schedule the broadcast coroutine to run on the event loop
+            future = asyncio.run_coroutine_threadsafe(
+                self.manager.broadcast({
+                    "event": "assignments",
+                    "data": assignments
+                }),
+                self.loop
+            )
+            
+            # Wait for the result with a timeout
+            result = future.result(timeout=10)
+            print(f"Broadcast result: {result}")
+        
+        except asyncio.TimeoutError:
+            print("Broadcast failed: Operation timed out.")
+        except Exception as e:
+            print(f"Broadcast failed: {e}")
+        
         return Result(
             value=f"Assignments: {assignments}, Remaining Supplies: {remaining_supplies}, Remaining Demands: {remaining_demands}",
             agent=self.dispatch_agent
