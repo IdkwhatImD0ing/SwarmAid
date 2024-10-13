@@ -1,49 +1,57 @@
 db = {
     "locations": {
         # Suppliers
-        "Grocery Store A": {
+        "Kroger": {
+            "surplus": [],
+            "surplus_mapping": {},
             "data": {
-                "lat": 40.712776,
-                "lon": -74.005974,
-                "address": "123 Main St, New York, NY 10001"
+                "lat": 42.315701,
+                "lon": -83.192711,
+                "address": "15255 Michigan Ave, Dearborn, MI 48126"
             }
         },
-        "Bakery B": {
+        "Cinnabon": {
+            "surplus": [],
+            "surplus_mapping": {},
             "data": {
-                "lat": 42.652580,
-                "lon": -73.756232,
-                "address": "456 Country Rd, Albany, NY 12207"
+                "lat": 42.3167159,
+                "lon": -83.2228552,
+                "address": "18900 Michigan Ave G118, Dearborn, MI 48126"
             }
         },
-        "Seafood Market C": {
-
+        "Redford Fish & Seafood Market": {
+            "surplus": [],
+            "surplus_mapping": {},
             "data": {
-                "lat": 42.886448,
-                "lon": -78.878372,
-                "address": "789 Market St, Buffalo, NY 14202"
+                "lat": 42.3571096,
+                "lon": -83.2760451,
+                "address": "24050 Joy Rd, Redford Charter Twp, MI 48239"
             }
         },
         
         # Demanders
-        "Soup Kitchen X": {
+        "Helping Hand - Food Pantry": {
+            "demand": [],
             "data": {
-                "lat": 40.717054,
-                "lon": -73.984472,
-                "address": "321 Charity Ave, New York, NY 10002"
+                "lat": 42.312950,
+                "lon": -83.273697,
+                "address": "24110 Cherry Hill St, Dearborn, MI 48128"
             }
         },
-        "Homeless Shelter Y": {
+        "Journey To Housing": {
+            "demand": [],
             "data": {
-                "lat": 42.652580,
-                "lon": -73.756232,
-                "address": "654 Support St, Albany, NY 12205"
+                "lat": 42.334370,
+                "lon": -83.289870,
+                "address": "6466 N Evangeline St, Dearborn Heights, MI 48127"
             }
         },
-        "Community Kitchen Z": {
+        "All Saints Soup Kitchen and Food Pantry": {
+            "demand": [],
             "data": {
-                "lat": 42.886448,
-                "lon": -78.878372,
-                "address": "987 Hope Rd, Buffalo, NY 14203"
+                "lat": 42.339380,
+                "lon": -83.135820,
+                "address": "Inside the Lower Level of the PAL building, 6945 Wagner St, Detroit, MI 48210"
             }
         }
     }
