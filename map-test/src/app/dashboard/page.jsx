@@ -6,7 +6,9 @@ import {Input} from '@/components/ui/input'
 import {ScrollArea} from '@/components/ui/scroll-area'
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
 import {Send} from 'lucide-react'
-import Notifications from './notifications' // Adjust the import path if necessary
+import Notifications from './Notifications' // Ensure correct import path
+import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 export default function UserDashboard() {
   const [messages, setMessages] = useState([
@@ -93,37 +95,25 @@ export default function UserDashboard() {
 
   return (
     <div className="flex flex-col h-screen p-4 bg-gray-100">
-      <div className="bg-primary p-4 rounded-lg mb-4">
-        <h2 className="text-2xl font-bold text-primary-foreground">
-          User Dashboard
-        </h2>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-green-500 to-teal-400 p-4 rounded-lg mb-4 shadow-md">
+        <h2 className="text-2xl font-bold text-white">User Dashboard</h2>
       </div>
+
+      {/* Main Content */}
       <div className="flex flex-1 space-x-4">
         {/* Chatbot Section */}
-        <div className="flex flex-col w-full md:w-1/2 bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="bg-primary p-4">
-            <h2 className="text-xl font-bold text-primary-foreground">
-              ChatBot
-            </h2>
+        <div className="flex flex-col w-full md:w-1/2 bg-white rounded-xl shadow-xl overflow-hidden">
+          {/* Chatbot Header */}
+          <div className="bg-gradient-to-r from-green-500 to-teal-400 px-4 py-3 flex justify-between items-center">
+            <h2 className="text-xl font-semibold text-white">ChatBot</h2>
+            {/* Optional: Add any header actions here */}
           </div>
-          <ScrollArea className="flex-grow p-4">
-            {messages.map((message, index) => {
-              if (message.role === 'notification') {
-                return (
-                  <div key={index} className="mb-4">
-                    <div className="flex justify-center">
-                      <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-2 rounded-lg shadow-md">
-                        <p className="text-sm">
-                          <strong>To:</strong> {message.recipient}
-                        </p>
-                        <p className="mt-1">{message.content}</p>
-                      </div>
-                    </div>
-                  </div>
-                )
-              }
 
-              return (
+          {/* Messages Area with Fixed Height */}
+          <div className="flex flex-col flex-grow">
+            <ScrollArea className="p-4 flex-grow h-80">
+              {messages.map((message, index) => (
                 <div
                   key={index}
                   className={`flex ${
@@ -133,7 +123,7 @@ export default function UserDashboard() {
                   <div
                     className={`flex items-start ${
                       message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
-                    }`}
+                    } max-w-full`}
                   >
                     <Avatar className="w-8 h-8">
                       <AvatarFallback>
@@ -142,56 +132,73 @@ export default function UserDashboard() {
                       <AvatarImage
                         src={
                           message.role === 'user'
-                            ? '/placeholder.svg?height=32&width=32'
-                            : '/placeholder.svg?height=32&width=32'
+                            ? '/placeholder-user.svg'
+                            : '/placeholder-assistant.svg'
+                        }
+                        alt={
+                          message.role === 'user'
+                            ? 'User Avatar'
+                            : 'Assistant Avatar'
                         }
                       />
                     </Avatar>
                     <div
-                      className={`mx-2 p-3 rounded-lg ${
+                      className={`mx-2 p-3 rounded-lg max-w-xs ${
                         message.role === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-secondary'
+                          ? 'bg-teal-500 text-white'
+                          : 'bg-gray-200 text-gray-800'
                       }`}
                     >
-                      {message.content}
+                      <Markdown
+                        remarkPlugins={[remarkGfm]}
+                        className="prose prose-sm dark:prose-dark break-words"
+                      >
+                        {message.content}
+                      </Markdown>
                     </div>
                   </div>
                 </div>
-              )
-            })}
-          </ScrollArea>
+              ))}
+            </ScrollArea>
 
-          <div className="p-4 border-t">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                handleSend()
-              }}
-              className="flex space-x-2"
-            >
-              <Input
-                type="text"
-                placeholder="Type your message..."
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                className="flex-grow"
-              />
-              <Button type="submit" size="icon">
-                <Send className="h-4 w-4" />
-                <span className="sr-only">Send</span>
-              </Button>
-            </form>
+            {/* Input Area */}
+            <div className="p-4 border-t border-gray-200">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  handleSend()
+                }}
+                className="flex space-x-2"
+              >
+                <Input
+                  type="text"
+                  placeholder="Type your message..."
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  className="flex-grow border border-gray-300 focus:border-teal-500 focus:ring-teal-500"
+                />
+                <Button
+                  type="submit"
+                  variant="primary"
+                  className="bg-teal-500 hover:bg-teal-600"
+                >
+                  <Send className="h-4 w-4" />
+                  <span className="sr-only">Send</span>
+                </Button>
+              </form>
+            </div>
           </div>
         </div>
 
         {/* Notifications Section */}
-        <div className="flex flex-col w-full md:w-1/2 bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="bg-secondary p-4">
-            <h2 className="text-xl font-bold text-secondary-foreground">
-              Notifications
-            </h2>
+        <div className="flex flex-col w-full md:w-1/2 bg-white rounded-xl shadow-xl overflow-hidden">
+          {/* Notifications Header */}
+          <div className="bg-gradient-to-r from-green-500 to-teal-400 px-4 py-3 flex justify-between items-center">
+            <h2 className="text-xl font-semibold text-white">Notifications</h2>
+            {/* Optional: Add any header actions here */}
           </div>
+
+          {/* Notifications Content */}
           <ScrollArea className="flex-grow p-4">
             <Notifications notifications={notifications} />
           </ScrollArea>

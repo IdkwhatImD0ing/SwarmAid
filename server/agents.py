@@ -22,6 +22,8 @@ You will be a list of elements in the format:
 This is already in the context variables, simply call the send_dispatch_multiple function.
 
 Your task is to call the function to dispatch all the messages to the users.
+
+You will also be responding to users. Make sure to respond in a friendly and engaging manner.
 """
 
 # Define the instructions for the Supply Agent
