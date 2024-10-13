@@ -2,10 +2,12 @@
 
 import { useState, useMemo } from 'react'
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api'
-import { X, BarChart3 } from 'lucide-react'
+import { X, BarChart3, PieChart, Utensils, Truck, DollarSign } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
 
 const locations = {
   "locations": {
@@ -77,7 +79,6 @@ const mapContainerStyle = {
   height: '100%'
 }
 
-// University of Michigan-Dearborn
 const center = {
   lat: 42.3177,
   lng: -83.2331
@@ -142,23 +143,75 @@ const LocationCard = ({ name, data, onClose }) => {
   )
 }
 
+const StatsCard = ({ title, value, icon: Icon }) => (
+  <Card>
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium">
+        {title}
+      </CardTitle>
+      <Icon className="h-4 w-4 text-muted-foreground" />
+    </CardHeader>
+    <CardContent>
+      <div className="text-2xl font-bold">{value}</div>
+    </CardContent>
+  </Card>
+)
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8']
+
+const RedistributedFoodChart = ({ data }) => (
+    <Card className="col-span-2">
+    <CardHeader>
+      <CardTitle>Redistributed Food</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="h-[300px] flex">
+        <ResponsiveContainer width="50%" height="100%">
+          <RechartsPieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              outerRadius={80}
+              fill="#8884d8"
+              dataKey="value"
+              startAngle={0}
+              endAngle={360}
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip />
+          </RechartsPieChart>
+        </ResponsiveContainer>
+        <div className="w-1/2 flex flex-col justify-center">
+          {data.map((entry, index) => (
+            <div key={`legend-${index}`} className="flex items-center mb-2">
+              <div 
+                className="w-4 h-4 mr-2" 
+                style={{ backgroundColor: COLORS[index % COLORS.length] }}
+              />
+              <span>{entry.name}: {entry.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+)
+
 const StatsPanel = ({ stats }) => (
-  <div className="mb-4">
-    <h2 className="text-lg font-medium flex items-center mb-2">
-      <BarChart3 className="mr-2 h-5 w-5" />
-      Top Stats
-    </h2>
-    <ul className="space-y-2">
-      <li>
-        <span className="font-semibold">Most Common Missing Food:</span> {stats.mostCommonMissing}
-      </li>
-      <li>
-        <span className="font-semibold">Most Common Extra Food:</span> {stats.mostCommonExtra}
-      </li>
-      <li>
-        <span className="font-semibold">Top Donor:</span> {stats.topDonor}
-      </li>
-    </ul>
+  <div className="space-y-4">
+    <h2 className="text-2xl font-bold mb-4">Mission Control Dashboard</h2>
+    <div className="grid grid-cols-2 gap-4">
+      <StatsCard title="Total Food Redist." value={`${stats.totalFoodRedistributed} kg`} icon={Utensils} />
+      <StatsCard title="Food Waste Reduc." value={`${stats.foodWasteReduction}%`} icon={BarChart3} />
+      <StatsCard title="Fuel Reduction" value={`${stats.fuelReduction} L`} icon={Truck} />
+      <StatsCard title="Cash Value of Items" value={`$${stats.cashValue}`} icon={DollarSign} />
+      <RedistributedFoodChart data={stats.redistributedFoodData} />
+    </div>
   </div>
 )
 
@@ -175,33 +228,19 @@ export default function MissionControl() {
   }
 
   const stats = useMemo(() => {
-    const demandCounts = {}
-    const surplusCounts = {}
-    const donorCounts = {}
-
-    Object.entries(locations.locations).forEach(([name, data]) => {
-      if ('demand' in data) {
-        data.demand.forEach(item => {
-          demandCounts[item] = (demandCounts[item] || 0) + 1
-        })
-      } else if ('surplus' in data) {
-        data.surplus.forEach(category => {
-          data.surplus_mapping[category].forEach(item => {
-            surplusCounts[item] = (surplusCounts[item] || 0) + 1
-          })
-        })
-        donorCounts[name] = data.surplus.reduce((acc, category) => acc + data.surplus_mapping[category].length, 0)
-      }
-    })
-
-    const mostCommonMissing = Object.entries(demandCounts).sort((a, b) => b[1] - a[1])[0][0]
-    const mostCommonExtra = Object.entries(surplusCounts).sort((a, b) => b[1] - a[1])[0][0]
-    const topDonor = Object.entries(donorCounts).sort((a, b) => b[1] - a[1])[0][0]
-
+    // This is mock data. In a real application, you would calculate these values based on actual data.
     return {
-      mostCommonMissing,
-      mostCommonExtra,
-      topDonor
+      totalFoodRedistributed: 5000,
+      foodWasteReduction: 30,
+      fuelReduction: 500,
+      cashValue: 25000,
+      redistributedFoodData: [
+        { name: 'Fruits', value: 400 },
+        { name: 'Vegetables', value: 300 },
+        { name: 'Grains', value: 300 },
+        { name: 'Dairy', value: 200 },
+        { name: 'Meat', value: 100 },
+      ]
     }
   }, [])
 
@@ -236,7 +275,7 @@ export default function MissionControl() {
           </div>
         )}
       </div>
-      <div className="w-64 bg-white shadow-lg z-10">
+      <div className="w-100 bg-white shadow-lg z-10 overflow-auto">
         <ScrollArea className="h-screen">
           <div className="p-4">
             <StatsPanel stats={stats} />
