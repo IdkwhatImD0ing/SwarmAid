@@ -322,7 +322,7 @@ class AgentSwarm:
             context_variables['locations'] = {}
         
         if location_name not in context_variables['locations']:
-            context_variables['locations'][location_name] = {}
+            return "Location not found. Inform the user that we currently only support the locations in the database: " + str(context_variables['locations'].keys())
             
         # Now, based on the type, we update the context variables accordingly
         if type == "supply":

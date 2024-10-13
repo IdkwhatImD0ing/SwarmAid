@@ -38,11 +38,13 @@ async def websocket_endpoint(websocket: WebSocket, client_id: Optional[str] = No
         return
     # save this client into server memory
     await manager.connect(websocket, client_id)
+    db = get_db()
+    swarm = AgentSwarm(db, manager, websocket)
     try:
         while True:
             data = await websocket.receive_json()
             event = data["event"]
-            swarm = AgentSwarm(db, manager, websocket)
+            
             print(event)
             if event == "get_db":
                 # Retrieve all calls from the database
@@ -58,8 +60,16 @@ async def websocket_endpoint(websocket: WebSocket, client_id: Optional[str] = No
                     websocket,
                 )
             if event == "message":
+                print(data)
                 messages = data["messages"]
                 response = swarm.run(messages, stream=True)
+                
+                await manager.send_personal_message(
+                    {
+                        "event": "message_start",
+                    },
+                    websocket,
+                )
 
                 for chunk in response:
                     if "content" in chunk and chunk['content']:
@@ -71,6 +81,12 @@ async def websocket_endpoint(websocket: WebSocket, client_id: Optional[str] = No
                              },
                             websocket,
                         )
+                await manager.send_personal_message(
+                    {
+                        "event": "message_end",
+                    },
+                    websocket,
+                )
 
     except WebSocketDisconnect:
         print("Disconnecting...", client_id)
