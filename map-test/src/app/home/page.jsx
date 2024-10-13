@@ -1,7 +1,7 @@
 'use client'
 
 import {useState, useMemo, useEffect} from 'react'
-import {GoogleMap, useJsApiLoader, Marker} from '@react-google-maps/api'
+import {GoogleMap, useJsApiLoader, Marker, DirectionsRenderer} from '@react-google-maps/api'
 import {X, BarChart3, PieChart, Utensils, Truck, DollarSign} from 'lucide-react'
 import {Badge} from '@/components/ui/badge'
 import {ScrollArea} from '@/components/ui/scroll-area'
@@ -10,6 +10,8 @@ import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import RedistributedFoodChart from './chart'
 import CombinedStats from './combined'
 import AssignmentsList from './assignments'
+import { useLoadScript } from '@react-google-maps/api'
+
 const mapContainerStyle = {
   width: '100%',
   height: '100%',
@@ -89,6 +91,52 @@ const StatsPanel = ({stats}) => (
 )
 
 export default function MissionControl() {
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+  });
+  const [selectedOrigin, setSelectedOrigin] = useState(null);
+  const [selectedDestination, setSelectedDestination] = useState(null);
+  const [directions, setDirections] = useState(null);
+
+  const handleAssignmentClick = (origin, destination) => {
+    setSelectedOrigin(origin);
+    setSelectedDestination(destination);
+  };
+
+  const calculateRoute = () => {
+    console.log('calculating route', selectedOrigin, selectedDestination);
+    console.log('google', window.google);
+    if (selectedOrigin && selectedDestination && window.google) {
+      const directionsService = new window.google.maps.DirectionsService();
+
+      console.log('origin latlng', selectedOrigin.lat, selectedOrigin.lng);
+      console.log('destination latlng', selectedDestination.lat, selectedDestination.lng);
+
+      directionsService.route(
+        {
+          origin: new window.google.maps.LatLng(locations.locations[selectedOrigin].data.lat, locations.locations[selectedOrigin].data.lon),
+          destination: new window.google.maps.LatLng(locations.locations[selectedDestination].data.lat, locations.locations[selectedDestination].data.lon),
+          travelMode: window.google.maps.TravelMode.DRIVING,
+        },
+        (result, status) => {
+          if (status === window.google.maps.DirectionsStatus.OK) {
+            setDirections(result);
+          } else {
+            console.error('Directions request failed due to ' + status);
+            setDirections(null);
+          }
+        }
+      );
+    } else {
+      setDirections(null);
+    }
+  };
+
+  useEffect(() => {
+    console.log('locations', locations);
+    calculateRoute();
+  }, [selectedOrigin, selectedDestination]);
+
   const [selectedLocation, setSelectedLocation] = useState(null)
   const [locations, setLocations] = useState({locations: {}})
   const [connected, setConnected] = useState(false)
@@ -144,11 +192,6 @@ export default function MissionControl() {
     ],
   }), [])
 
-  const {isLoaded} = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
-  })
-
   const handleMarkerClick = (name, data) => {
     setSelectedLocation({name, ...data})
   }
@@ -188,6 +231,8 @@ export default function MissionControl() {
                 onClick={() => handleMarkerClick(name, data)}
               />
             ))}
+            {directions && <DirectionsRenderer directions={directions} />}
+            <AssignmentsList assignments={assignments} googleMaps={window.google.maps} />
           </GoogleMap>
         ) : (
           <div>Loading...</div>
@@ -204,21 +249,23 @@ export default function MissionControl() {
       </div>
       <div className="w-1/3 bg-white shadow-lg z-10 flex flex-col">
         {/* Existing ScrollArea for Stats */}
-        <div className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full p-4">
-            <h2 className="text-2xl font-bold mb-4">
-              Mission Control Dashboard
-            </h2>
-            <StatsPanel stats={stats} />
-          </ScrollArea>
-        </div>
-        {/* New ScrollArea for Transfers */}
-        <div className="flex-1 overflow-hidden border-t p-4">
-          <h2 className="text-2xl font-bold mb-4">Transfers</h2>
-          <ScrollArea className="h-full">
-            <AssignmentsList assignments={assignments} />
-          </ScrollArea>
-        </div>
+        {isLoaded && <div>
+          <div className="flex-1 overflow-hidden">
+            <ScrollArea className="h-full p-4">
+              <h2 className="text-2xl font-bold mb-4">
+                Mission Control Dashboard
+              </h2>
+              <StatsPanel stats={stats} />
+            </ScrollArea>
+          </div>
+          {/* New ScrollArea for Transfers */}
+          <div className="flex-1 overflow-hidden border-t p-4">
+            <h2 className="text-2xl font-bold mb-4">Transfers</h2>
+            <ScrollArea className="h-full">
+              <AssignmentsList assignments={assignments} onAssignmentClick={handleAssignmentClick} />
+            </ScrollArea>
+          </div>
+        </div>}
       </div>
     </div>
   )

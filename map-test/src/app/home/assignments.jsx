@@ -2,13 +2,17 @@
 import {Card, CardHeader, CardContent, CardTitle} from '@/components/ui/card'
 import {Badge} from '@/components/ui/badge'
 
-const AssignmentsList = ({assignments}) => {
+const AssignmentsList = ({assignments, onAssignmentClick}) => {
   return (
     <div className="space-y-4">
       {assignments.map((assignment, index) => {
-        const [origin, destination, category, items] = assignment
+        const [origin, destination, category, items] = assignment;
         return (
-          <Card key={index} className="shadow-md">
+          <Card 
+            key={index} 
+            className="shadow-md cursor-pointer hover:bg-gray-100 transition-colors"
+            onClick={() => onAssignmentClick(origin, destination)}
+          >
             <CardHeader className="flex justify-between items-center">
               <CardTitle className="text-lg font-semibold">
                 {origin} &rarr; {destination}
@@ -26,10 +30,10 @@ const AssignmentsList = ({assignments}) => {
               </ul>
             </CardContent>
           </Card>
-        )
+        );
       })}
     </div>
-  )
-}
+  );
+};
 
-export default AssignmentsList
+export default AssignmentsList;
