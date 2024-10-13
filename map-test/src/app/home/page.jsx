@@ -2,71 +2,71 @@
 
 import { useState, useMemo } from 'react'
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api'
-import { X, ChevronDown, ChevronUp, BarChart3 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { X, BarChart3 } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 
 const locations = {
   "locations": {
-    "Grocery Store A": {
+    "Kroger": {
       "surplus": ["fruits", "dairy"],
       "surplus_mapping": {
-        "fruits": ["strawberry", "apple"],
-        "dairy": ["milk", "cheese"]
+        "fruits": ["bananas", "apples"],
+        "dairy": ["milk", "yogurt"]
       },
       "data": {
-        "lat": 40.712776,
-        "lon": -74.005974,
-        "address": "123 Main St, New York, NY 10001"
+        "lat": 42.3228,
+        "lon": -83.1785,
+        "address": "15255 Michigan Ave, Dearborn, MI 48126"
       }
     },
-    "Bakery B": {
-      "surplus": ["grains", "baked goods"],
+    "Westborn Market": {
+      "surplus": ["vegetables", "baked goods"],
       "surplus_mapping": {
-        "grains": ["bread", "rice"],
-        "baked goods": ["muffins", "cookies"]
+        "vegetables": ["carrots", "lettuce"],
+        "baked goods": ["bread", "pastries"]
       },
       "data": {
-        "lat": 42.652580,
-        "lon": -73.756232,
-        "address": "456 Country Rd, Albany, NY 12207"
+        "lat": 42.3022,
+        "lon": -83.2322,
+        "address": "21755 Michigan Ave, Dearborn, MI 48124"
       }
     },
-    "Seafood Market C": {
-      "surplus": ["seafood"],
+    "Dearborn Fresh Supermarket": {
+      "surplus": ["grains", "canned goods"],
       "surplus_mapping": {
-        "seafood": ["salmon", "shrimp"]
+        "grains": ["rice", "pasta"],
+        "canned goods": ["soup", "beans"]
       },
       "data": {
-        "lat": 42.886448,
-        "lon": -78.878372,
-        "address": "789 Market St, Buffalo, NY 14202"
+        "lat": 42.3220,
+        "lon": -83.1760,
+        "address": "13661 Colson St, Dearborn, MI 48126"
       }
     },
-    "Soup Kitchen X": {
-      "demand": ["fruits", "seafood"],
+    "Forgotten Harvest": {
+      "demand": ["fruits", "vegetables"],
       "data": {
-        "lat": 40.717054,
-        "lon": -73.984472,
-        "address": "321 Charity Ave, New York, NY 10002"
+        "lat": 42.3312,
+        "lon": -83.0458,
+        "address": "21800 Greenfield Rd, Oak Park, MI 48237"
       }
     },
-    "Homeless Shelter Y": {
-      "demand": ["dairy", "grains"],
+    "Zaman International": {
+      "demand": ["canned goods", "dairy"],
       "data": {
-        "lat": 42.652580,
-        "lon": -73.756232,
-        "address": "654 Support St, Albany, NY 12205"
+        "lat": 42.2922,
+        "lon": -83.2838,
+        "address": "26091 Trowbridge St, Inkster, MI 48141"
       }
     },
-    "Community Kitchen Z": {
-      "demand": ["baked goods", "seafood"],
+    "Gleaners Community Food Bank": {
+      "demand": ["grains", "proteins"],
       "data": {
-        "lat": 42.886448,
-        "lon": -78.878372,
-        "address": "987 Hope Rd, Buffalo, NY 14203"
+        "lat": 42.3314,
+        "lon": -83.0458,
+        "address": "2131 Beaufait St, Detroit, MI 48207"
       }
     }
   }
@@ -77,9 +77,10 @@ const mapContainerStyle = {
   height: '100%'
 }
 
+// University of Michigan-Dearborn
 const center = {
-  lat: 41.881832,
-  lng: -75.789206
+  lat: 42.3177,
+  lng: -83.2331
 }
 
 const SupplierIcon = {
@@ -111,75 +112,58 @@ const InventoryList = ({ title, items }) => (
   </div>
 )
 
-const LocationCard = ({ name, data, onToggle, isOpen }) => {
+const LocationCard = ({ name, data, onClose }) => {
   const isSupplier = 'surplus' in data
   const items = isSupplier ? data.surplus : data.demand
   const itemDetails = isSupplier ? data.surplus_mapping : {}
 
   return (
-    <Card className="mb-4">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{name}</CardTitle>
-        <Badge variant={isSupplier ? "default" : "secondary"} className="ml-2">
-          {isSupplier ? "Supplier" : "Demander"}
-        </Badge>
-      </CardHeader>
-      <CardContent>
-        <button
-          onClick={onToggle}
-          className="flex items-center justify-between w-full text-sm text-gray-500 hover:text-gray-700"
-        >
-          {isOpen ? "Hide Details" : "Show Details"}
-          {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </button>
-        {isOpen && (
-          <div className="mt-2">
-            <p className="text-sm">{data.data.address}</p>
-            <InventoryList 
-              title={isSupplier ? "Surplus Items" : "Demanded Items"} 
-              items={items.flatMap(category => 
-                isSupplier ? itemDetails[category] : [category]
-              )} 
-            />
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <div className="bg-white shadow-lg rounded-lg p-4 w-64">
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-lg font-semibold">{name}</h3>
+        <Button variant="ghost" size="icon" onClick={onClose}>
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </Button>
+      </div>
+      <Badge variant={isSupplier ? "default" : "secondary"} className="mb-2">
+        {isSupplier ? "Supplier" : "Demander"}
+      </Badge>
+      <p className="text-sm mb-2">{data.data.address}</p>
+      <ScrollArea className="h-40">
+        <InventoryList 
+          title={isSupplier ? "Surplus Items" : "Demanded Items"} 
+          items={items.flatMap(category => 
+            isSupplier ? itemDetails[category] : [category]
+          )} 
+        />
+      </ScrollArea>
+    </div>
   )
 }
 
 const StatsPanel = ({ stats }) => (
-  <Card className="mb-4 mt-20 bg-white bg-opacity-90">
-    <CardHeader>
-      <CardTitle className="text-lg font-medium flex items-center">
-        <BarChart3 className="mr-2 h-5 w-5" />
-        Top Stats
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <ul className="space-y-2">
-        <li>
-          <span className="font-semibold">Most Common Missing Food:</span> {stats.mostCommonMissing}
-        </li>
-        <li>
-          <span className="font-semibold">Most Common Extra Food:</span> {stats.mostCommonExtra}
-        </li>
-        <li>
-          <span className="font-semibold">Top Donor:</span> {stats.topDonor}
-        </li>
-      </ul>
-    </CardContent>
-  </Card>
+  <div className="mb-4">
+    <h2 className="text-lg font-medium flex items-center mb-2">
+      <BarChart3 className="mr-2 h-5 w-5" />
+      Top Stats
+    </h2>
+    <ul className="space-y-2">
+      <li>
+        <span className="font-semibold">Most Common Missing Food:</span> {stats.mostCommonMissing}
+      </li>
+      <li>
+        <span className="font-semibold">Most Common Extra Food:</span> {stats.mostCommonExtra}
+      </li>
+      <li>
+        <span className="font-semibold">Top Donor:</span> {stats.topDonor}
+      </li>
+    </ul>
+  </div>
 )
 
 export default function MissionControl() {
   const [selectedLocation, setSelectedLocation] = useState(null)
-  const [openCards, setOpenCards] = useState({})
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-
-  const toggleCard = (id) => {
-    setOpenCards(prev => ({ ...prev, [id]: !prev[id] }))
-  }
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -188,12 +172,6 @@ export default function MissionControl() {
 
   const handleMarkerClick = (name, data) => {
     setSelectedLocation({ name, ...data })
-    setSidebarOpen(true)
-  }
-
-  const closeSidebar = () => {
-    setSidebarOpen(false)
-    setSelectedLocation(null)
   }
 
   const stats = useMemo(() => {
@@ -228,13 +206,13 @@ export default function MissionControl() {
   }, [])
 
   return (
-    <div className="relative h-screen">
-      <div className="w-full h-full">
+    <div className="relative h-screen flex">
+      <div className="flex-1 relative">
         {isLoaded ? (
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
             center={center}
-            zoom={7}
+            zoom={12}
           >
             {Object.entries(locations.locations).map(([name, data]) => (
               <Marker
@@ -248,31 +226,23 @@ export default function MissionControl() {
         ) : (
           <div>Loading...</div>
         )}
-      </div>
-      <div className="absolute top-4 left-4 w-64 z-10">
-        <StatsPanel stats={stats} />
-      </div>
-      {sidebarOpen && selectedLocation && (
-        <div className="absolute top-0 right-0 w-full md:w-1/3 h-full bg-white shadow-lg transition-transform transform translate-x-0">
-          <div className="p-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">{selectedLocation.name}</h2>
-              <Button variant="ghost" size="icon" onClick={closeSidebar}>
-                <X className="h-4 w-4" />
-                <span className="sr-only">Close sidebar</span>
-              </Button>
-            </div>
-            <ScrollArea className="h-[calc(100vh-8rem)]">
-              <LocationCard
-                name={selectedLocation.name}
-                data={selectedLocation}
-                onToggle={() => toggleCard(selectedLocation.name)}
-                isOpen={openCards[selectedLocation.name]}
-              />
-            </ScrollArea>
+        {selectedLocation && (
+          <div className="absolute top-20 right-4 z-20">
+            <LocationCard
+              name={selectedLocation.name}
+              data={selectedLocation}
+              onClose={() => setSelectedLocation(null)}
+            />
           </div>
-        </div>
-      )}
+        )}
+      </div>
+      <div className="w-64 bg-white shadow-lg z-10">
+        <ScrollArea className="h-screen">
+          <div className="p-4">
+            <StatsPanel stats={stats} />
+          </div>
+        </ScrollArea>
+      </div>
     </div>
   )
 }
