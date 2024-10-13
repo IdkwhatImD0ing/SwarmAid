@@ -132,6 +132,18 @@ export default function MissionControl() {
     }
   }, [])
 
+  const mapOptions = useMemo(() => ({
+    disableDefaultUI: true,
+    clickableIcons: false,
+    styles: [
+      {
+        featureType: "poi",
+        elementType: "labels",
+        stylers: [{ visibility: "off" }],
+      },
+    ],
+  }), [])
+
   const {isLoaded} = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
@@ -166,6 +178,7 @@ export default function MissionControl() {
             mapContainerStyle={mapContainerStyle}
             center={center}
             zoom={12}
+            options={mapOptions}
           >
             {Object.entries(locations.locations).map(([name, data]) => (
               <Marker
