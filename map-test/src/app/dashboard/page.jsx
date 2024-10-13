@@ -7,6 +7,8 @@ import {ScrollArea} from '@/components/ui/scroll-area'
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
 import {Send} from 'lucide-react'
 import Notifications from './notifications' // Adjust the import path if necessary
+import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 export default function UserDashboard() {
   const [messages, setMessages] = useState([
@@ -108,21 +110,6 @@ export default function UserDashboard() {
           </div>
           <ScrollArea className="flex-grow p-4">
             {messages.map((message, index) => {
-              if (message.role === 'notification') {
-                return (
-                  <div key={index} className="mb-4">
-                    <div className="flex justify-center">
-                      <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-2 rounded-lg shadow-md">
-                        <p className="text-sm">
-                          <strong>To:</strong> {message.recipient}
-                        </p>
-                        <p className="mt-1">{message.content}</p>
-                      </div>
-                    </div>
-                  </div>
-                )
-              }
-
               return (
                 <div
                   key={index}
@@ -154,7 +141,9 @@ export default function UserDashboard() {
                           : 'bg-secondary'
                       }`}
                     >
-                      {message.content}
+                      <Markdown remarkPlugins={[remarkGfm]}>
+                        {message.content}
+                      </Markdown>
                     </div>
                   </div>
                 </div>
