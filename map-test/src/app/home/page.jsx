@@ -23,17 +23,17 @@ const center = {
 }
 
 const SupplierIcon = {
-  path: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z',
-  fillColor: '#22c55e',
-  fillOpacity: 1,
-  strokeWeight: 1,
-  strokeColor: '#ffffff',
-  scale: 1.5,
-}
+  path: 'M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2 M15 18H9 M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14 M17 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z M7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',
+  fillColor: 'none',
+  fillOpacity: 0,
+  strokeWeight: 2,
+  strokeColor: '#287be6',
+  scale: 1,
+ }
 
 const DemandIcon = {
-  path: 'M16 6v-2c0-2.21-1.79-4-4-4s-4 1.79-4 4v2h-4v14h16v-14h-4zm-6-2c0-1.1.9-2 2-2s2 .9 2 2v2h-4v-2z',
-  fillColor: '#3b82f6',
+  path: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z',
+  fillColor: '#28e648',
   fillOpacity: 1,
   strokeWeight: 1,
   strokeColor: '#ffffff',
